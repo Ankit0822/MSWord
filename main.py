@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtPrintSupport import *
+from PyQt5.QtCore import *
 import sys
 
 
@@ -13,7 +14,8 @@ class MSWord(QMainWindow):
         self.showMaximized()
         self.setWindowTitle("MS Word Clone")
         self.create_toolbar()
-        
+        font = QFont('Times', 15)
+        self.editor.setFont(font)
         self.editor.setFontPointSize(15)
         self.create_menu_bar()
 
@@ -66,9 +68,64 @@ class MSWord(QMainWindow):
         toolbar.addSeparator()
         toolbar.addSeparator()
 
+        self.combo_font = QComboBox(self)
+        self.combo_font.addItems(["Courier Std","Hellenic Typewriter Regular", "Arial", "Sans Serif", "Helvetica", "Times", "Monospaced"])
+        self.combo_font.activated.connect(self.set_font_style)
+        toolbar.addWidget(self.combo_font)
+
+
         self.font_size.setValue(15)
         self.font_size.valueChanged.connect(self.set_font)
         toolbar.addWidget(self.font_size)
+
+        toolbar.addSeparator()
+
+        bold = QAction(QIcon('bold.png'),'Bold',self)
+        bold.triggered.connect(self.bold_text)
+        toolbar.addAction(bold)
+
+        underline = QAction(QIcon('underline.png'),'Underline',self)
+        underline.triggered.connect(self.underline_text)
+        toolbar.addAction(underline)
+
+        italic = QAction(QIcon('italic.png'),'Italic',self)
+        italic.triggered.connect(self.italic_text)
+        toolbar.addAction(italic)
+
+        toolbar.addSeparator()
+
+        right_align = QAction(QIcon('right-align.png'),'Align Right', self)
+        right_align.triggered.connect(lambda: self.editor.setAlignment(Qt.AlignRight))
+        toolbar.addAction(right_align)
+
+        left_align = QAction(QIcon('left-align.png'),'Align left', self)
+        left_align.triggered.connect(lambda: self.editor.setAlignment(Qt.AlignLeft))
+        toolbar.addAction(left_align)
+
+        justification_align = QAction(QIcon('justification.png'),'Center/Justify', self)
+        justification_align.triggered.connect(lambda: self.editor.setAlignment(Qt.AlignCenter))
+        toolbar.addAction(justification_align)
+
+
+
+    def italic_text(self):
+        flag = self.editor.fontItalic()
+        self.editor.setFontItalic(not(flag))
+
+    
+    def underline_text(self):
+        flag = self.editor.fontUnderline()
+        self.editor.setFontUnderline(not(flag))
+
+    def bold_text(self):
+        if self.editor.fontWeight() != QFont.Bold:
+            self.editor.setFontWeight(QFont.Bold)
+            return
+        self.editor.setFontWeight(QFont.Normal)
+
+    def set_font_style(self):
+        font = self.combo_font.currentText()
+        self.editor.setCurrentFont(QFont(font))
 
     def set_font(self):
         font_value = self.font_size.value()
